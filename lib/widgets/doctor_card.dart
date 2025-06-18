@@ -10,55 +10,233 @@ class DoctorCard {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFFE5E7EB),
+          width: 1,
+        ),
       ),
-      padding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 20,
-      ),
-      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            'Name: ${doctorData['name']}',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-          Text('Status: ${doctorData['business_status']}'),
-          Text('Rating: ${doctorData['rating']}'),
-          Text('Total User Ratings: ${doctorData['user_ratings_total']}'),
-          Text('Address: ${doctorData['vicinity']}'),
-          if (doctorData['opening_hours'] != null)
-            Text(
-                'Open Now: ${doctorData['opening_hours']['open_now'] ? 'Yes' : 'No'}'),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          // Header with name and status
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Doctor icon
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.local_hospital,
+                  color: Color(0xFF3B82F6),
+                  size: 24,
+                ),
               ),
-              backgroundColor: Colors.teal,
-            ),
-            onPressed: () async {
-              // url = Uri.parse(
-              //     "https://www.google.com/maps/search/?api=1&query=$lat,$lng");
-              //
-              // openMap(url);
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      doctorData['name'] ?? 'Unknown Doctor',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(doctorData['business_status'])
+                            .withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _getStatusText(doctorData['business_status']),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: _getStatusColor(doctorData['business_status']),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
 
-              var address = doctorData['vicinity'];
-              log('address: $address');
-              url = Uri.parse(
-                  "https://www.google.com/maps/search/?api=1&query=$address");
-              openMap(url);
-            },
-            child: const Text(
-              'Get Directions',
-              style: TextStyle(color: Colors.white),
+          const SizedBox(height: 16),
+
+          // Rating and reviews
+          if (doctorData['rating'] != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Row(
+                    children: List.generate(5, (index) {
+                      final rating = doctorData['rating']?.toDouble() ?? 0.0;
+                      return Icon(
+                        index < rating.floor()
+                            ? Icons.star
+                            : (index < rating
+                                ? Icons.star_half
+                                : Icons.star_border),
+                        color: const Color(0xFFFBBF24),
+                        size: 16,
+                      );
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${doctorData['rating']?.toString() ?? 'N/A'} • ${doctorData['user_ratings_total']?.toString() ?? '0'} reviews',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 16),
+
+          // Address
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                color: Color(0xFF6B7280),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  doctorData['vicinity'] ?? 'Address not available',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Opening hours
+          if (doctorData['opening_hours'] != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  color: doctorData['opening_hours']['open_now'] == true
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFFEF4444),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  doctorData['opening_hours']['open_now'] == true
+                      ? 'Open Now'
+                      : 'Closed',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: doctorData['opening_hours']['open_now'] == true
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 20),
+
+          // Action button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                var address = doctorData['vicinity'];
+                log('address: $address');
+                url = Uri.parse(
+                    "https://www.google.com/maps/search/?api=1&query=$address");
+                openMap(url);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              icon: const Icon(Icons.directions, size: 18),
+              label: const Text(
+                'Get Directions',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  static Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'operational':
+        return const Color(0xFF10B981);
+      case 'closed_temporarily':
+        return const Color(0xFFF59E0B);
+      case 'closed_permanently':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFF6B7280);
+    }
+  }
+
+  static String _getStatusText(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'operational':
+        return 'Open';
+      case 'closed_temporarily':
+        return 'Temporarily Closed';
+      case 'closed_permanently':
+        return 'Permanently Closed';
+      default:
+        return status ?? 'Unknown';
+    }
   }
 
   static Future<void> openMap(Uri url) async {
