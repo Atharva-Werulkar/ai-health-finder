@@ -10,20 +10,17 @@ class DoctorCard {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF6366F1).withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
+            spreadRadius: 0,
           ),
         ],
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -33,18 +30,21 @@ class DoctorCard {
             children: [
               // Doctor icon
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3B82F6).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  ),
                 ),
                 child: const Icon(
-                  Icons.local_hospital,
-                  color: Color(0xFF3B82F6),
-                  size: 24,
+                  Icons.local_hospital_rounded,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,35 +175,53 @@ class DoctorCard {
               ],
             ),
           ],
+          const SizedBox(height: 24),
 
-          const SizedBox(height: 20),
-
-          // Action button
-          SizedBox(
+          // Enhanced Action button
+          Container(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                var address = doctorData['vicinity'];
-                log('address: $address');
-                url = Uri.parse(
-                    "https://www.google.com/maps/search/?api=1&query=$address");
-                openMap(url);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B82F6),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
               ),
-              icon: const Icon(Icons.directions, size: 18),
-              label: const Text(
-                'Get Directions',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6366F1).withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () async {
+                  var address = doctorData['vicinity'];
+                  log('address: $address');
+                  url = Uri.parse(
+                      "https://www.google.com/maps/search/?api=1&query=$address");
+                  openMap(url);
+                },
+                child: const Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.directions_rounded,
+                          size: 20, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Get Directions',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

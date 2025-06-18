@@ -24,8 +24,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Initialize the GenerativeModel and ChatSession
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
+  GenerativeModel? _model;
+  ChatSession? _chat;
 
   // Initialize the TextEditingController
   final TextEditingController _controller = TextEditingController();
@@ -37,17 +37,24 @@ class _HomePageState extends State<HomePage> {
   // Initialize the loading variable and the list of messages
   bool _loading = false;
   final List<MessageWidget> _messages = [];
-
   @override
   void initState() {
     super.initState();
 
-    // Initialize the GenerativeModel with the API key
-    _model = GenerativeModel(
-      model: 'gemini-2.0-flash',
-      apiKey: geminiApiKey,
-    );
-    _chat = _model.startChat();
+    // Check if API keys are loaded
+    if (!areApiKeysLoaded) {
+      log('Warning: API keys not properly loaded from .env file');
+    } // Initialize the GenerativeModel with the API key
+    if (geminiApiKey.isNotEmpty) {
+      _model = GenerativeModel(
+        model: 'gemini-2.0-flash',
+        apiKey: geminiApiKey,
+      );
+      _chat = _model?.startChat();
+      log('Chat started successfully with Gemini model');
+    } else {
+      log('Error: Gemini API key not available');
+    }
 
     log('Chat started successfully. $_model');
 
@@ -199,92 +206,119 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
 
-                        const SizedBox(height: 28),
-
-                        // Modern Text Input
+                        const SizedBox(height: 28), // Enhanced Text Input
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFB),
-                            borderRadius: BorderRadius.circular(16),
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFFE5E7EB),
+                              color: const Color(0xFFE2E8F0),
                               width: 1,
                             ),
                           ),
                           child: TextField(
                             controller: _controller,
                             maxLines: 4,
-                            decoration: const InputDecoration(
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: const Color(0xFF0F172A),
+                              height: 1.5,
+                            ),
+                            decoration: InputDecoration(
                               hintText:
-                                  'Describe your symptoms here...\nE.g., "I have a headache and feel dizzy"',
-                              hintStyle: TextStyle(
-                                color: Color(0xFF9CA3AF),
-                                fontSize: 14,
-                                height: 1.4,
+                                  'Tell me about your symptoms...\n\nExample: "I have a persistent headache and feel dizzy when I stand up"',
+                              hintStyle: GoogleFonts.inter(
+                                color: const Color(0xFF94A3B8),
+                                fontSize: 15,
+                                height: 1.6,
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.all(20),
-                            ),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF1A1A1A),
-                              height: 1.4,
+                              contentPadding: const EdgeInsets.all(24),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // Modern Action Button
-                        SizedBox(
+                        // Enhanced Action Button
+                        Container(
                           width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_controller.text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Please describe your symptoms first'),
-                                    backgroundColor: Color(0xFFEF4444),
-                                  ),
-                                );
-                                return;
-                              }
-                              await _sendChatMessage("${_controller.text} "
-                                  " What is the medical specialist of the doctor? give one word answer");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00B4D8),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: _loading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
-                                    ),
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: _loading
+                                ? const LinearGradient(
+                                    colors: [
+                                      Color(0xFFCBD5E1),
+                                      Color(0xFF94A3B8)
+                                    ],
                                   )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.psychology, size: 20),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Analyze Symptoms',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
+                                : const LinearGradient(
+                                    colors: [
+                                      Color(0xFF6366F1),
+                                      Color(0xFF8B5CF6)
                                     ],
                                   ),
+                            boxShadow: _loading
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: const Color(0xFF6366F1)
+                                          .withOpacity(0.3),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: _loading
+                                  ? null
+                                  : () async {
+                                      if (_controller.text.trim().isEmpty) {
+                                        _showErrorSnackBar(
+                                            'Please describe your symptoms first');
+                                        return;
+                                      }
+                                      await _sendChatMessage(
+                                          "${_controller.text} "
+                                          " What is the medical specialist of the doctor? give one word answer");
+                                    },
+                              child: Center(
+                                child: _loading
+                                    ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.psychology_rounded,
+                                            color: Colors.white,
+                                            size: 22,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            'Analyze Symptoms',
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -467,7 +501,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   String getChatHistory() {
-    return _chat.history.map((content) {
+    if (_chat == null) return '';
+    return _chat!.history.map((content) {
       return content.parts
           .whereType<TextPart>()
           .map<String>((e) => e.text)
@@ -476,12 +511,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _sendChatMessage(String message) async {
+    if (_chat == null) {
+      _showErrorSnackBar(
+          'AI service is not available. Please check your API configuration.');
+      return;
+    }
+
     setState(() {
       _loading = true;
     });
 
     try {
-      var response = await _chat.sendMessage(
+      var response = await _chat!.sendMessage(
         Content.text(message),
       );
 

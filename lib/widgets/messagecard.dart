@@ -23,18 +23,15 @@ class MessageWidget extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: const Color(0xFF6366F1).withOpacity(0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 6),
+              spreadRadius: 0,
             ),
           ],
-          border: Border.all(
-            color: const Color(0xFFE5E7EB),
-            width: 1,
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,8 +9,16 @@ void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // Load environment variables with comprehensive error handling
+  try {
+    await dotenv.load();
+    log('Environment variables loaded successfully');
+  } catch (e) {
+    log('Warning: Could not load .env file: $e');
+    log('The app will continue without environment variables');
+    // Initialize dotenv with empty environment
+    dotenv.testLoad(fileInput: '');
+  }
 
   runApp(const MyApp());
 }
